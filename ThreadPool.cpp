@@ -21,21 +21,21 @@ ThreadPool::ThreadPool(size_t threadCount)
     m_available = new bool[threadCount];
 
     for (int i = 0; i < m_threadCount; i++) {
-        sem_t* mutex = new sem_t();
-        sem_init(mutex, 0, 1);
-        m_sems[i] = *mutex;
+        sem_t mutex;
+        sem_init(&mutex, 0, 1);
+        m_sems[i] = mutex;
 
-        sem_wait(mutex);
+        // sem_wait(mutex);
         int value;
       sem_getvalue(&mutex, &value);
       printf("The value of the semaphors is %d\n", value);
-        sem_wait(mutex);
+        // sem_wait(mutex);
+      sem_post(&mutex);
 
               sem_getvalue(&mutex, &value);
       printf("The value of the semaphors is %d\n", value);
 
       exit(0);
-
         m_available[i] = true;
         // m_sems[i].lock();
 
