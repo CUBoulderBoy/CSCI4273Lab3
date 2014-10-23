@@ -20,7 +20,12 @@ int main(int argc, char* argv[])
   for (int i = 0; i < MAX_TASKS; i++) {
     int* x = new int();
     *x = i+1;
-    tp.dispatch_thread(hello, (void*) x);
+    if (tp.thread_avail()) {
+      tp.dispatch_thread(hello, (void*) x);
+    }
+    else {
+      i--;
+    }
   }
 
   unsigned int microseconds = 5000000;
