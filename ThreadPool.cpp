@@ -28,17 +28,15 @@ ThreadPool::ThreadPool(size_t threadCount)
         sem_init(&mutex, 0, 1);
         m_sems[i] = mutex;
 
-        // sem_wait(mutex);
-        int value;
-      sem_getvalue(&mutex, &value);
-      printf("The value of the semaphors is %d\n", value);
-        // sem_wait(mutex);
-      sem_post(&mutex);
+        // int value;
+        // sem_getvalue(&mutex, &value);
+        // printf("The value of the semaphors is %d\n", value);
+        sem_wait(&mutex);
 
-              sem_getvalue(&mutex, &value);
-      printf("The value of the semaphors is %d\n", value);
+        // sem_getvalue(&mutex, &value);
+        // printf("The value of the semaphors is %d\n", value);
 
-      exit(0);
+        // exit(0);
         m_available[i] = true;
         // m_sems[i].lock();
 
@@ -75,7 +73,7 @@ int ThreadPool::dispatch_thread(void dispatch_function(void*), void *arg)
             m_arg = arg;
             m_thread_index = i;
             m_available[m_thread_index] = false;
-            // sem_post(&m_sems[i]);
+            sem_post(&m_sems[i]);
             // m_sems[i].unlock();
             return i;
         }
