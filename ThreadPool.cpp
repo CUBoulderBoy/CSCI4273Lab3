@@ -56,7 +56,7 @@ ThreadPool::ThreadPool(size_t threadCount)
             exit(1);
         }
     }
-    cout << m_threadCount << " threads created by the thread pool" << endl;
+    // cout << m_threadCount << " threads created by the thread pool" << endl;
 }
 
 ThreadPool::~ThreadPool()
@@ -71,7 +71,9 @@ int ThreadPool::dispatch_thread(void dispatch_function(void*), void *arg)
 
     for (int i = 0; i < m_threadCount; i++) {
         if (m_available[i]) {
+            cout << dispatch_function << endl;
             m_fn_ptr[i] = dispatch_function;
+            cout << m_fn_ptr[i] << endl;
             m_arg[i] = arg;
             m_thread_index = i;
             m_available[m_thread_index] = false;
@@ -95,11 +97,12 @@ bool ThreadPool::thread_avail()
 void ThreadPool::execute_thread(int i)
 {
     int count = 0;
-    cout << "executeing thread " << i << endl;
+    // cout << "executeing thread " << i << endl;
     while (true) {
         sem_wait(&m_sems[i]);
         cout << "here" << endl;
-        (*m_fn_ptr[i])(m_arg[i]);
+        cout << m_fn_ptr[i] << endl;
+        (*(m_fn_ptr[i]))(m_arg[i]);
         cout << "there" << endl;
         m_available[i] = true;
         count++;
