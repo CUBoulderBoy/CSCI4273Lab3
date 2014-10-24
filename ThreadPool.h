@@ -4,6 +4,8 @@
 #include <mutex>
 #include <iostream>
 
+typedef void (*function_pointer)(void*);
+
 class ThreadPool
 {
 public:
@@ -11,16 +13,13 @@ public:
     ~ThreadPool();
     int dispatch_thread(void dispatch_function(void*), void *arg);
     bool thread_avail();
-    void execute_thread();
+    void execute_thread(int i);
 
 private:
     size_t m_threadCount;
     int m_thread_index;
-    // pthread_t m_threads;
-    // std::mutex* m_mutex_array;
     sem_t* m_sems;
     bool* m_available;
-    void (*m_fn_ptr)(void*);
-    void* m_arg;
-
+    function_pointer* m_fn_ptr;
+    void** m_arg;
 };
