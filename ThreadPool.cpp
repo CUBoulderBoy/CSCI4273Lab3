@@ -15,10 +15,12 @@ void* startThread(void* arg);
 
 void* startThread(void* arg)
 {
+    cout << "starting thread" << endl;
     threadIndex* ti = (threadIndex*) arg;
     threadIndex threadStruct = *ti;
     ThreadPool* tp = threadStruct.tp;
     int i = threadStruct.index;
+
     tp->execute_thread(i);
     return NULL;
 }
@@ -36,10 +38,10 @@ ThreadPool::ThreadPool(size_t threadCount)
     for (int i = 0; i < m_threadCount; i++) {
         sem_t mutex;
         err = sem_init(&mutex, 0, 1);
-        if (err < 0) {
-            cout << "error: " << strerror(errno) << endl;
-            exit(1);
-        }
+        // if (err < 0) {
+        //     cout << "error: " << strerror(errno) << endl;
+        //     exit(1);
+        // }
         m_sems[i] = mutex;
 
         sem_wait(&mutex);
@@ -65,6 +67,8 @@ ThreadPool::~ThreadPool()
 
 int ThreadPool::dispatch_thread(void dispatch_function(void*), void *arg)
 {
+    cout << "dispatch called" << endl;
+
     for (int i = 0; i < m_threadCount; i++) {
         if (m_available[i]) {
             m_fn_ptr[i] = dispatch_function;
@@ -91,9 +95,12 @@ bool ThreadPool::thread_avail()
 void ThreadPool::execute_thread(int i)
 {
     int count = 0;
+    cout << "executeing thread " << i << endl;
     while (true) {
         sem_wait(&m_sems[i]);
+        cout << "here" << endl;
         (*m_fn_ptr[i])(m_arg[i]);
+        cout << "there" << endl;
         m_available[i] = true;
         count++;
         cout << count << endl;
