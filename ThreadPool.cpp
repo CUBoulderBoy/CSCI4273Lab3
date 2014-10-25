@@ -46,7 +46,7 @@ ThreadPool::ThreadPool(size_t threadCount)
 
 ThreadPool::~ThreadPool()
 {
-    // no dynamic memory used
+    delete[] m_threads;
 }
 
 int ThreadPool::dispatch_thread(void dispatch_function(void*), void *arg)
