@@ -1,4 +1,4 @@
-#include <vector>
+#include <map>
 #include <pthread.h>
 #include <semaphore.h>
 #include <mutex>
@@ -13,13 +13,17 @@ public:
     ~ThreadPool();
     int dispatch_thread(void dispatch_function(void*), void *arg);
     bool thread_avail();
-    void execute_thread(int i);
+    void execute_thread();
 
 private:
     size_t m_threadCount;
-    int m_thread_index;
-    sem_t* m_sems;
-    bool* m_available;
-    function_pointer* m_fn_ptr;
-    void** m_arg;
+    pthread_t* m_threads;;
+    // sem_t* m_sems;
+    // bool* m_available;
+    // function_pointer* m_fn_ptr;
+    // void** m_arg;
+    std::map<pthread_t, sem_t> m_sems;
+    std::map<pthread_t, bool> m_available;
+    std::map<pthread_t, function_pointer> m_fn_ptr;
+    std::map<pthread_t, void*> m_arg;
 };
