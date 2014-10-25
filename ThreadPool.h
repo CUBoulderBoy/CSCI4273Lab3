@@ -1,6 +1,7 @@
 #include <map>
 #include <pthread.h>
 #include <semaphore.h>
+#include <string.h>
 #include <mutex>
 #include <iostream>
 
@@ -18,10 +19,6 @@ public:
 private:
     size_t m_threadCount;
     pthread_t* m_threads;;
-    // sem_t* m_sems;
-    // bool* m_available;
-    // function_pointer* m_fn_ptr;
-    // void** m_arg;
     std::map<pthread_t, sem_t> m_sems;
     std::map<pthread_t, bool> m_available;
     std::map<pthread_t, function_pointer> m_fn_ptr;
