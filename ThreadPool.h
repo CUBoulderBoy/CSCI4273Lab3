@@ -14,7 +14,6 @@ public:
     ~ThreadPool();
     int dispatch_thread(void dispatch_function(void*), void *arg);
     bool thread_avail();
-    void execute_thread();
 
 private:
     size_t m_threadCount;
@@ -23,4 +22,7 @@ private:
     std::map<pthread_t, bool> m_available;
     std::map<pthread_t, function_pointer> m_fn_ptr;
     std::map<pthread_t, void*> m_arg;
+
+    void execute_thread();
+    static void* startThread(void* arg);
 };

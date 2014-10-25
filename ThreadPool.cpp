@@ -7,7 +7,7 @@
 
 using namespace std;
 
-void* startThread(void* arg)
+void* ThreadPool::startThread(void* arg)
 {
     if (LOGGING) cout << "starting thread " << pthread_self() << endl;
     ThreadPool* tp = (ThreadPool*) arg;
@@ -32,7 +32,7 @@ ThreadPool::ThreadPool(size_t threadCount)
         sem_wait(&mutex);
 
         pthread_t tid;
-        err = pthread_create(&tid, NULL, startThread, (void*) this);
+        err = pthread_create(&tid, NULL, ThreadPool::startThread, (void*) this);
         if (err != 0) {
             cout << "pthread_create() failed: " << err << endl;
             exit(1);
