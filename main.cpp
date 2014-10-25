@@ -17,18 +17,13 @@ int main(int argc, char* argv[])
 {
   ThreadPool tp(4);
 
-  int trys = 0;
   for (int i = 0; i < MAX_TASKS; i++) {
     int* x = new int();
     *x = i+1;
     if (tp.thread_avail()) {
       tp.dispatch_thread(hello, (void*) x);
     }
-    else if (trys > 100000) {
-      break;
-    }
     else {
-      trys++;
       i--;
     }
   }

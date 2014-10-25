@@ -7,9 +7,6 @@
 
 using namespace std;
 
-
-void* startThread(void* arg);
-
 void* startThread(void* arg)
 {
     if (LOGGING) cout << "starting thread " << pthread_self() << endl;
@@ -44,13 +41,12 @@ ThreadPool::ThreadPool(size_t threadCount)
         m_available[tid] = true;
         m_threads[i] = tid;
     }
-    cout << m_threadCount << " threads created by the thread pool" << endl;
+    if (LOGGING) cout << m_threadCount << " threads created by the thread pool" << endl;
 }
 
 ThreadPool::~ThreadPool()
 {
-    // delete[] m_available;
-    // delete[] m_sems;
+    // no dynamic memory used
 }
 
 int ThreadPool::dispatch_thread(void dispatch_function(void*), void *arg)
@@ -89,6 +85,5 @@ void ThreadPool::execute_thread()
         if (LOGGING) cout << tid << " going\n";
         (*(m_fn_ptr[tid]))(m_arg[tid]);
         m_available[tid] = true;
-        // if (LOGGING) cout << tid << " available\n";
     }
 }
