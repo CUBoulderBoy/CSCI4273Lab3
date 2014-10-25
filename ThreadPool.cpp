@@ -5,6 +5,7 @@
 
 using namespace std;
 
+
 void* startThread(void* arg);
 
 void* startThread(void* arg)
@@ -48,9 +49,9 @@ ThreadPool::ThreadPool(size_t threadCount)
         }
         m_sems[tid] = mutex;
         m_available[tid] = true;
-
+        m_threads[i] = tid;
     }
-    // cout << m_threadCount << " threads created by the thread pool" << endl;
+    cout << m_threadCount << " threads created by the thread pool" << endl;
 }
 
 ThreadPool::~ThreadPool()
@@ -61,18 +62,17 @@ ThreadPool::~ThreadPool()
 
 int ThreadPool::dispatch_thread(void dispatch_function(void*), void *arg)
 {
-    cout << "dispatch called" << endl;
 
     for (int i = 0; i < m_threadCount; i++) {
         pthread_t tid = m_threads[i];
+        cout << "dispatching " << tid << endl;
+
         if (m_available[tid]) {
-            cout << dispatch_function << endl;
             m_fn_ptr[tid] = dispatch_function;
-            cout << m_fn_ptr[tid] << endl;
             m_arg[tid] = arg;
             // m_thread_index = i;
             m_available[tid] = false;
-            sem_post(&m_sems[tid]);
+            sem_post(&(m_sems[tid]));
             return i;
         }
     }
@@ -91,17 +91,13 @@ bool ThreadPool::thread_avail()
 
 void ThreadPool::execute_thread()
 {
-    int count = 0;
     pthread_t tid = pthread_self();
-    // cout << "executeing thread " << i << endl;
     while (true) {
+        cout << tid << " waiting\n";
         sem_wait(&m_sems[tid]);
-        cout << "here" << endl;
+        cout << tid << " going\n";
         cout << m_fn_ptr[tid] << endl;
         (*(m_fn_ptr[tid]))(m_arg[tid]);
-        cout << "there" << endl;
         m_available[tid] = true;
-        count++;
-        cout << count << endl;
     }
 }
