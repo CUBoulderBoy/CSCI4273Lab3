@@ -1,5 +1,9 @@
+#ifndef _EVENT_SCHEDULER_
+#define _EVENT_SCHEDULER_
+
 #include <vector>
 #include <queue>
+#include <mutex>
 #include "ThreadPool.h"
 
 typedef void (*function_pointer)(void*);
@@ -9,6 +13,7 @@ struct Event
     function_pointer fn_ptr;
     void* arg;
     int trigger_time;
+    int id;
 };
 
 class CompareEvent {
@@ -28,4 +33,10 @@ private:
     std::priority_queue<Event, std::vector<Event>, CompareEvent> m_queue;
     size_t m_max_events;
     ThreadPool* m_pool;
+    int m_current_id;
+    std::mutex m_mutex;
+
+    static void coordinateEvent(void* arg);
 };
+
+#endif
