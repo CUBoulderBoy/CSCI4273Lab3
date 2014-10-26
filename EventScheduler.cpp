@@ -19,15 +19,15 @@ void EventScheduler::coordinateEvent(void* arg)
     }
 
     es->m_mutex.lock();
-    if (e.trigger_time == es->m_queue.top().trigger_time) {
-        es->m_queue.pop();
-        es->m_mutex.unlock();
-
-        (*(e.fn_ptr))(e.arg);
+    for (std::vector<int>::iterator i = es->m_cancelled.begin(); i != es->m_cancelled.end(); ++i) {
+        if (e.id == *i) {
+            es->m_mutex.unlock();
+            return;
+        }
     }
-    else {
-        es->m_mutex.unlock();
-    }
+    es->m_queue.pop();
+    es->m_mutex.unlock();
+    (*(e.fn_ptr))(e.arg);
 }
 
 EventScheduler::EventScheduler(size_t maxEvents)
@@ -54,5 +54,7 @@ int EventScheduler::eventSchedule(void evFunction(void *), void *arg, int timeou
 
 void EventScheduler::eventCancel(int eventId)
 {
-
+    m_mutex.lock();
+    m_cancelled.push_back(eventId);
+    m_mutex.unlock();
 }

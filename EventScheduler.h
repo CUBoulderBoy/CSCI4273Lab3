@@ -35,6 +35,7 @@ private:
     ThreadPool* m_pool;
     int m_current_id;
     std::mutex m_mutex;
+    std::vector<int> m_cancelled;
 
     static void coordinateEvent(void* arg);
 };

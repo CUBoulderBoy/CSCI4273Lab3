@@ -6,7 +6,7 @@
 
 using namespace std;
 
-const int MAX_TASKS = 16;
+const int MAX_TASKS = 4;
 
 void hello(void* arg)
 {
@@ -17,20 +17,22 @@ void hello(void* arg)
 int main(int argc, char* argv[])
 {
   ThreadPool tp(4);
+  EventScheduler es(4);
 
   for (int i = 0; i < MAX_TASKS; i++) {
     int* x = new int();
     *x = i+1;
-    if (tp.thread_avail()) {
-      tp.dispatch_thread(hello, (void*) x);
-    }
-    else {
-      i--;
-    }
+    es.eventSchedule(hello, (void*) x, 1000000 * (*x));
+    // if (tp.thread_avail()) {
+    //   tp.dispatch_thread(hello, (void*) x);
+    // }
+    // else {
+    //   i--;
+    // }
   }
 
   cout << "Before sleep\n";
-  unsigned int microseconds = 2000000;
+  unsigned int microseconds = 5000000;
   usleep(microseconds);
 
   cout << "Exiting app..." << endl;
