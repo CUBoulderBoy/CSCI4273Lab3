@@ -1,3 +1,6 @@
+#ifndef _THREAD_POOL_
+#define _THREAD_POOL_
+
 #include <map>
 #include <pthread.h>
 #include <semaphore.h>
@@ -26,3 +29,5 @@ private:
     void execute_thread();
     static void* startThread(void* arg);
 };
+
+#endif

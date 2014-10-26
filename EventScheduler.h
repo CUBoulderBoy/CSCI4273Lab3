@@ -1,32 +1,31 @@
-#include <iostream>
-#include <chrono>
-#include <thread>
-#include <future>
+#include <vector>
+#include <queue>
+#include "ThreadPool.h"
 
-// int main()
-// {
-//     // Use async to launch a function (lambda) in parallel
-//     std::async(std::launch::async, [] () {
-//         // Use sleep_for to wait specified time (or sleep_until).
-//         std::this_thread::sleep_for( std::chrono::seconds{1});
-//         // Do whatever you want.
-//         std::cout << "Lights out!" << std::endl;
-//     } );
-//     std::this_thread::sleep_for( std::chrono::seconds{2});
-//     std::cout << "Finished" << std::endl;
-// }
+typedef void (*function_pointer)(void*);
+
+struct Event
+{
+    function_pointer fn_ptr;
+    void* arg;
+    int trigger_time;
+};
+
+class CompareEvent {
+public:
+    bool operator()(Event& e1, Event& e2) { return e2.trigger_time < e1.trigger_time; };
+};
 
 class EventScheduler
 {
 public:
-    EventScheduler(size t maxEvents);
-    ∼EventScheduler();
+    EventScheduler(size_t maxEvents);
+    ~EventScheduler();
     int eventSchedule(void evFunction(void *), void *arg, int timeout);
     void eventCancel(int eventId);
+
+private:
+    std::priority_queue<Event, std::vector<Event>, CompareEvent> m_queue;
+    size_t m_max_events;
+    ThreadPool* m_pool;
 };
-
-
-int EventScheduler::eventSchedule(void evFunction(void *), void *arg, int timeout)
-{
-
-}

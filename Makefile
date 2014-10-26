@@ -1,2 +1,3 @@
 all:
-	g++ main.cpp ThreadPool.cpp -lpthread -std=c++11
+	# g++ EventScheduler.cpp
+	g++ main.cpp ThreadPool.cpp EventScheduler.cpp -lpthread -std=c++11

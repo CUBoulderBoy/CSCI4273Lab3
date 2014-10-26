@@ -1,4 +1,5 @@
 #include "ThreadPool.h"
+#include "EventScheduler.h"
 
 #include <iostream>
 #include <unistd.h>
