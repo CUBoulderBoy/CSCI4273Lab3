@@ -4,15 +4,21 @@
 #include <iostream>
 #include <sys/select.h>
 
+#define LOGGING 1
+
 using namespace std;
 
 void EventScheduler::coordinateEvent(void* arg)
 {
     EventScheduler* es = (EventScheduler*) arg;
 
+    es->m_mutex.lock();
     Event e = es->m_queue.top();
+    es->m_queue.pop();
+    es->m_mutex.unlock();
 
-    struct timeval tv = {e.trigger_time, 0};
+    if (LOGGING) cout << "scheduling event " << e.id << endl;
+    struct timeval tv = {0, e.trigger_time};
     if (select(0, NULL, NULL, NULL, &tv) < 0) {
         cout << "error with select: " << strerror(errno) << endl;
         exit(1);
@@ -22,10 +28,10 @@ void EventScheduler::coordinateEvent(void* arg)
     for (std::vector<int>::iterator i = es->m_cancelled.begin(); i != es->m_cancelled.end(); ++i) {
         if (e.id == *i) {
             es->m_mutex.unlock();
+            es->m_cancelled.erase(i);
             return;
         }
     }
-    es->m_queue.pop();
     es->m_mutex.unlock();
     (*(e.fn_ptr))(e.arg);
 }
@@ -56,5 +62,6 @@ void EventScheduler::eventCancel(int eventId)
 {
     m_mutex.lock();
     m_cancelled.push_back(eventId);
+    if (LOGGING) cout << "cancelling event " << eventId << endl;
     m_mutex.unlock();
 }

@@ -21,8 +21,8 @@ int main(int argc, char* argv[])
 
   for (int i = 0; i < MAX_TASKS; i++) {
     int* x = new int();
-    *x = i+1;
-    es.eventSchedule(hello, (void*) x, 1000000 * (*x));
+    *x = i;
+    es.eventSchedule(hello, (void*) x, 1000000 * i);
     // if (tp.thread_avail()) {
     //   tp.dispatch_thread(hello, (void*) x);
     // }
@@ -30,6 +30,7 @@ int main(int argc, char* argv[])
     //   i--;
     // }
   }
+  es.eventCancel(2);
 
   cout << "Before sleep\n";
   unsigned int microseconds = 5000000;
