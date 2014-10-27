@@ -217,15 +217,18 @@ int Message::msgSplit(Message &secondMsg, size_t len)
 
 void Message::msgJoin(Message &secondMsg)
 {
-    char *content = msg_content;
-    size_t length = msglen;
+    // Copy second message content to pointer
+    char *content = secondMsg.msg_content;
 
-    msg_content = new char[msglen + secondMsg.msglen];
+    while (!content.empty()){
+        msg_content.push_back(content.front());
+        content.pop_front();
+    }
+
+    // Set local length
     msglen += secondMsg.msglen;
-    memcpy(msg_content, content, length);
-    memcpy(msg_content + length, secondMsg.msg_content, secondMsg.msglen);
-    delete content;
-    delete secondMsg.msg_content;
+
+    // Fix second message length and contents
     secondMsg.msg_content = NULL;
     secondMsg.msglen = 0;
 }
@@ -237,7 +240,18 @@ size_t Message::msgLen( )
 
 void Message::msgFlat(char *buffer)
 {
-    //Assume that sufficient memory has been allocated in buffer
-    memcpy(buffer, msg_content, msglen);
-}
+    // Variable to store current node
+    list <char *> to_buff = msg_content;
+    char * c_node;
+    int c_len;
 
+    // Loop and add to buffer
+    for (int i = 0; i < msglen;){
+        // Set current node and length
+        c_node = to_buff.front();
+        c_len = sizeof(c_node);
+
+        //Assume that sufficient memory has been allocated in buffer
+        memcpy(buffer+i, c_node, c_len);
+    }
+}
