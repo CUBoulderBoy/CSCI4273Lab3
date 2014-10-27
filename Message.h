@@ -157,18 +157,61 @@ char *Message::msgStripHdr(int len)
 
 int Message::msgSplit(Message &secondMsg, size_t len)
 {
-    char *content = msg_content;
-    size_t length = msglen;
+    list <char *> content;
+    int t_len = 0;
 
-    if ((len < 0) || (len > msglen)) return 0;
+    // If the len is less than 0, or the split length is less the
+    // length of the message then error out
+    if ((len < 0) || (len > msglen)){
+        return 0;
+    }
 
-    msg_content = new char[len];
+    // Loop through and build new messages
+    for (int i = 0; i < len;){
+        // Reset remaining length tracker
+        t_len = len - i;
+
+        // If the node perfectly fits, or is not enough, add it all
+        if (sizeof(msg_content.front()) <= t_len){
+            // Push the node to the new list
+            content.push_front(msg_content.front())
+
+            // Remove the node from the old list
+            msg_content.pop_front();
+
+            // Increment i
+            i += t_len;
+        }
+
+        // If the node is too large, split into two new nodes
+        if (sizeof(msg_content.front()) > t_len){
+            // Create new node buffers
+            char * one_node = new char[t_len]
+            char * two_node = msg_content.front();
+
+            // Copy into buffer
+            memcpy(one_node, two_node, t_len);
+
+            // Push to list
+            content.push_front(one_node);
+
+            // Update pointer on old list
+            two_node += t_len;
+            msg_content.pop_front();
+            msg_content.push_front(two_node);
+
+            // Increment i
+            i += t_len;
+        }
+    }
+    // Set second message
+    secondMsg.msglen = msglen - len;
+    secondMsg.msg_content = msg_content;
+
+    // Set first message
+    msg_content = content;
     msglen = len;
-    memcpy(msg_content, content, len);
-    secondMsg.msglen = length - len;
-    secondMsg.msg_content = new char[secondMsg.msglen];
-    memcpy(secondMsg.msg_content, content + len, secondMsg.msglen);
-    delete content;
+
     return 1;
 }
 
