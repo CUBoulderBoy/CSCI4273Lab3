@@ -4,8 +4,16 @@
 
 CFLG=-O3 -Wall -w -std=c++11
 LIBS=-lpthread
+CC=g++
 
 # Main target
-all:
-	# g++ EventScheduler.cpp
-	g++ $(CFLG) main.cpp ThreadPool.cpp EventScheduler.cpp Message.cpp $(LIBS)
+all: threadpool eventscheduler message
+
+threadpool:
+	$(CC) -o thread $(CFLG) driver1.cc ThreadPool.cpp $(LIBS)
+
+eventscheduler:
+	$(CC) -o event $(CFLG) driver2.cc EventScheduler.cpp $(LIBS)
+
+message:
+	$(CC) -o message $(CFLG) driver3.cc Message.cpp $(LIBS)
