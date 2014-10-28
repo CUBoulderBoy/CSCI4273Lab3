@@ -13,7 +13,7 @@ threadpool:
 	$(CC) -o thread $(CFLG) driver1.cc ThreadPool.cpp $(LIBS)
 
 eventscheduler:
-	$(CC) -o event $(CFLG) driver2.cc EventScheduler.cpp $(LIBS)
+	$(CC) -o event $(CFLG) driver2.cc EventScheduler.cpp ThreadPool.cpp $(LIBS)
 
 message:
 	$(CC) -o message $(CFLG) driver3.cc Message.cpp $(LIBS)
