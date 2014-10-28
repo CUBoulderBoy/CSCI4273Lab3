@@ -39,6 +39,8 @@ main ( )
     es.eventCancel(i3);
     i5 = es.eventSchedule(test_fn2, (void *)&a2, m2);
     i6 = es.eventSchedule(test_fn3, (void *)&a6, m6);
+
+    sleep(2);
 }
 
 

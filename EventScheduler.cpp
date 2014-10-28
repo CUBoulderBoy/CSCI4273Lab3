@@ -5,9 +5,15 @@
 #include <sys/select.h>
 #include <sys/time.h>
 
-#define LOGGING 1
+#define LOGGING 0
 
 using namespace std;
+
+bool compareTime(timeval t1, timeval t2) {
+    if (t2.tv_sec < t1.tv_sec) return true;
+    if (t2.tv_sec == t1.tv_sec && t2.tv_usec < t1.tv_usec) return true;
+    return false;
+}
 
 void EventScheduler::coordinateEvent(void* arg)
 {
@@ -24,10 +30,18 @@ void EventScheduler::coordinateEvent(void* arg)
         es->m_mutex.lock();
         if (!es->m_queue.empty()) {
             e = es->m_queue.top();
-            es->m_mutex.unlock();
 
             // wait for first timeout
-            es->m_tv = {e.trigger_time - tim.tv_sec, 0};
+            int msec = e.trigger_time.tv_usec - tim.tv_usec;
+            int sec = e.trigger_time.tv_sec - tim.tv_sec;
+            if (msec < 0) {
+                msec += 1000000;
+                sec--;
+            }
+            es->m_tv = {sec, msec};
+            es->m_mutex.unlock();
+
+            if (LOGGING) cout << "setting timer for " << sec << " " << msec << endl;
             if (select(0, NULL, NULL, NULL, &(es->m_tv)) < 0) {
                 cout << "error with select: " << strerror(errno) << endl;
                 exit(1);
@@ -79,18 +93,24 @@ EventScheduler::~EventScheduler()
 
 int EventScheduler::eventSchedule(void evFunction(void *), void *arg, int timeout)
 {
-    timeval tim;
+    timeval tim, event_time;
     gettimeofday(&tim, NULL);
-    int event_sec = timeout + tim.tv_sec;
-    Event e = {evFunction, arg, event_sec, m_current_id};
-    if (LOGGING) cout << "scheduling event " << m_current_id << endl;
+    int secs = 0;
+    int msecs = timeout * 1000 + tim.tv_usec;
+    while (msecs >= 1000000) {
+        msecs -= 1000000;
+        secs++;
+    }
+    event_time = {tim.tv_sec + secs, msecs};
+    Event e = {evFunction, arg, event_time, m_current_id};
 
     m_mutex.lock();
-    if (!m_queue.empty() && event_sec < m_queue.top().trigger_time) {
+    if (LOGGING) cout << "scheduling event " << m_current_id << " at " << event_time.tv_sec << " " << event_time.tv_usec << endl;
+    if (!m_queue.empty() && compareTime(event_time, m_queue.top().trigger_time))
+    {
         if (LOGGING) cout << "reseting first event time" << endl;
-        m_tv = {event_sec, 0};
+        m_tv = {event_time.tv_sec, event_time.tv_usec};
     }
-    if (LOGGING) cout << "scheduling event for " << event_sec << endl;
     m_queue.push(e);
     m_mutex.unlock();
     return m_current_id++;

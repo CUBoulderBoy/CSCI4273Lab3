@@ -12,13 +12,17 @@ struct Event
 {
     function_pointer fn_ptr;
     void* arg;
-    int trigger_time;
+    timeval trigger_time;
     int id;
 };
 
 class CompareEvent {
 public:
-    bool operator()(Event& e1, Event& e2) { return e2.trigger_time < e1.trigger_time; };
+    bool operator()(Event& e1, Event& e2) { 
+        if (e2.trigger_time.tv_sec < e1.trigger_time.tv_sec) return true;
+        if (e2.trigger_time.tv_sec == e1.trigger_time.tv_sec && e2.trigger_time.tv_usec < e1.trigger_time.tv_usec) return true;
+        return false;
+    };
 };
 
 class EventScheduler
@@ -36,7 +40,7 @@ private:
     int m_current_id;
     std::mutex m_mutex;
     std::vector<int> m_cancelled;
-    struct timeval m_tv;
+    timeval m_tv;
 
     static void coordinateEvent(void* arg);
 };
