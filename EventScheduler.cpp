@@ -1,4 +1,4 @@
-#include "EventScheduler.h"
+#include "eventscheduler.h"
 #include <pthread.h>
 #include <string.h>
 #include <iostream>

@@ -4,7 +4,7 @@
 #include <vector>
 #include <queue>
 #include <mutex>
-#include "ThreadPool.h"
+#include "threadpool.h"
 
 typedef void (*function_pointer)(void*);
 

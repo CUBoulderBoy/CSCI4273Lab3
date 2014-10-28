@@ -8,7 +8,7 @@
  * Last updated: October 22, 2014
  */
 
-#include "Message.h"
+#include "message.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -57,10 +57,10 @@ char *Message::msgStripHdr(int len)
     if ((int)sizeof(msg_content.front()) == len){
         // Save pointer to buffer
         stripped_content = msg_content.front();
-        
+
         // Remove the front node with the buffer from the list
         msg_content.pop_front();
-        
+
         // Adjust the length of the message
         msglen -= len;
 
@@ -77,12 +77,12 @@ char *Message::msgStripHdr(int len)
         if( n_len > len ){
             // Set pointer to return the old buffer
             stripped_content = msg_content.front();
-            
+
             // Save the old buffer pointer and adjust starting position
             new_msg_content = msg_content.front();
             msg_content.pop_front();
             new_msg_content += len;
-            
+
             // Push updated buffer pointer to the list
             msg_content.push_front(new_msg_content);
         }
