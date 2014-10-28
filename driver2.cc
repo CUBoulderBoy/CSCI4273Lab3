@@ -33,6 +33,7 @@ main ( )
     int i1, i2, i3, i4, i5, i6;
 
     i1 = es.eventSchedule(test_fn1, (void *)&a5, m5);
+    usleep(50);
     i2 = es.eventSchedule(test_fn2, (void *)&a1, m1);
     i3 = es.eventSchedule(test_fn3, (void *)&a4, m4);
     i4 = es.eventSchedule(test_fn1, (void *)&a3, m3);

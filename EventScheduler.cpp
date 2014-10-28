@@ -5,7 +5,7 @@
 #include <sys/select.h>
 #include <sys/time.h>
 
-#define LOGGING 0
+#define LOGGING 1
 
 using namespace std;
 
@@ -39,6 +39,7 @@ void EventScheduler::coordinateEvent(void* arg)
                 sec--;
             }
             es->m_tv = {sec, msec};
+            cout << &(es->m_tv) << endl;
             es->m_mutex.unlock();
 
             if (LOGGING) cout << "setting timer for " << sec << " " << msec << endl;
@@ -106,9 +107,9 @@ int EventScheduler::eventSchedule(void evFunction(void *), void *arg, int timeou
 
     m_mutex.lock();
     if (LOGGING) cout << "scheduling event " << m_current_id << " at " << event_time.tv_sec << " " << event_time.tv_usec << endl;
-    if (!m_queue.empty() && compareTime(event_time, m_queue.top().trigger_time))
+    if (!m_queue.empty() && compareTime(m_queue.top().trigger_time, event_time))
     {
-        if (LOGGING) cout << "reseting first event time" << endl;
+        if (LOGGING) cout << "reseting first event time " << &m_tv << endl;
         m_tv = {event_time.tv_sec, event_time.tv_usec};
     }
     m_queue.push(e);
