@@ -17,3 +17,6 @@ eventscheduler:
 
 message:
 	$(CC) -o message $(CFLG) driver3.cc Message.cpp $(LIBS)
+
+clean:
+	rm -f event thread message *.o *.a

@@ -31,7 +31,7 @@ public:
 
 private:
     size_t msglen;
-    list<char *> msg_content;
+    list<pair<char *, size_t>> msg_content;
 };
 
 #endif

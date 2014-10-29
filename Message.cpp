@@ -11,6 +11,7 @@
 #include "message.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <iostream>
 
 #include <list>
 #include <string.h>
@@ -26,7 +27,8 @@ Message::Message()
 Message::Message(char *msg, size_t len)
 {
     msglen = len;
-    msg_content.push_front(msg);
+    pair<char*,size_t> msg_pair (msg, len);
+    msg_content.push_front(msg_pair);
 }
 
 Message::~Message( )
@@ -37,13 +39,13 @@ Message::~Message( )
 void Message::msgAddHdr(char *hdr, size_t length)
 {
     msglen += length;
-    msg_content.push_front(hdr);
+    pair<char*,size_t> hdr_pair (hdr, length);
+    msg_content.push_front(hdr_pair);
 }
 
 char *Message::msgStripHdr(int len)
 {
     int n_len = 0;
-    int r_len = 0;
     int t_len = len;
     char *new_msg_content;
     char *stripped_content;
@@ -54,9 +56,9 @@ char *Message::msgStripHdr(int len)
     }
 
     // If the len is the size of the full first buffer, then just return it
-    if ((int)sizeof(msg_content.front()) == len){
+    if ((int)msg_content.front().second == len){
         // Save pointer to buffer
-        stripped_content = msg_content.front();
+        stripped_content = msg_content.front().first;
 
         // Remove the front node with the buffer from the list
         msg_content.pop_front();
@@ -70,81 +72,53 @@ char *Message::msgStripHdr(int len)
 
     // Otherwise build appropariate message to return
     else{
-        // Initialize the length of the front node
-        n_len = (int)sizeof(msg_content.front());
+        // Create buffer to store return
+        stripped_content = new char[len];
+        
+        // Loop until header return has been built
+        for(int i = 0; i < len;){
+            // Initialize the length of the front node
+            n_len = (int)msg_content.front().second;
 
-        // If the length of the node is larger than the desired length
-        if( n_len > len ){
-            // Set pointer to return the old buffer
-            stripped_content = msg_content.front();
+            // Initialize the remaining lenth needs
+            t_len = len - i;
 
-            // Save the old buffer pointer and adjust starting position
-            new_msg_content = msg_content.front();
-            msg_content.pop_front();
-            new_msg_content += len;
+            // If the node perfectly is perfectly sized or not large enough just add it all
+            if (n_len <= t_len){
+                // Copy the contents into the buffer
+                memcpy(stripped_content+i, msg_content.front().first, n_len);
 
-            // Push updated buffer pointer to the list
-            msg_content.push_front(new_msg_content);
-        }
+                // Remove the pointer from the list
+                msg_content.pop_front();
 
-        // If the first node is not larger enough to fill the reply buffer
-        else if ( n_len < len){
-            // Create buffer to store return
-            stripped_content = new char[len];
-
-            // Loop through until the length has been stripped
-            for(r_len = 0; r_len < len;){
-                // Initialize the length of the front node
-                n_len = (int)sizeof(msg_content.front());
-
-                // Reset t_len variable (amount of len remaining)
-                t_len = len - r_len;
-
-                // If the node perfectly is perfectly sized or not large enough just add it all
-                if (n_len <= t_len){
-                    // Make pointer set to the first point in the list
-                    new_msg_content = msg_content.front();
-
-                    // Copy the contents into the buffer
-                    memcpy(stripped_content+r_len, new_msg_content, n_len);
-
-                    // Remove the pointer from the list
-                    msg_content.pop_front();
-
-                    // Update r_len (length of return buffer)
-                    r_len += n_len;
-                }
-
-                // If the node doesn't over-flow, but has extras update pointer
-                else if (n_len > t_len){
-                    // Make pointer set to the first point in the list
-                    new_msg_content = msg_content.front();
-
-                    // Copy the contents into the buffer
-                    memcpy(stripped_content+r_len, new_msg_content, t_len);
-
-                    // Remove pointer, update and push back to list
-                    msg_content.pop_front();
-                    new_msg_content += t_len;
-                    msg_content.push_front(new_msg_content);
-
-                    // Update r_len (length of return buffer)
-                    r_len += t_len;
-                }
+                // Adjust i
+                i += n_len;
             }
 
-            // Update message length
-            msglen -= len;
+            // If the length of the node is larger than the desired length
+            else{
+                // Set pointer to return the old buffer
+                memcpy(stripped_content+i, msg_content.front().first, t_len);
 
-            // Return to calling function
-            return stripped_content;
+                // Save the old buffer pointer and adjust starting position
+                msg_content.front().first += t_len;
+                msg_content.front().second -= t_len;
+
+                // Adjust i
+                i += t_len;
+            }  
         }
+        // Update message length
+        msglen -= len;
+
+        // Return to calling function
+        return stripped_content;
     }
 }
 
 int Message::msgSplit(Message &secondMsg, size_t len)
 {
-    list <char *> content;
+    list < pair<char*, size_t> >content;
     int t_len = 0;
 
     // If the len is less than 0, or the split length is less the
@@ -154,38 +128,47 @@ int Message::msgSplit(Message &secondMsg, size_t len)
     }
 
     // Loop through and build new messages
-    for (int i = 0; i < len;){
+    for (int i = 0; i < (int)len;){
         // Reset remaining length tracker
         t_len = len - i;
 
+        // For testing
+        //cout << "Amount remaining: " << t_len << endl;
+        //cout << "Begin i value: " << i << endl;
+
         // If the node perfectly fits, or is not enough, add it all
-        if (sizeof(msg_content.front()) <= t_len){
+        if ((int)msg_content.front().second <= t_len){
             // Push the node to the new list
-            content.push_front(msg_content.front());
+            pair<char*, size_t> move (msg_content.front().first, msg_content.front().second);
+            content.push_back(move);
 
             // Remove the node from the old list
             msg_content.pop_front();
 
             // Increment i
-            i += t_len;
+            i += (int)content.back().second;
+
+            // For testing
+            //cout << "End i value: " << i << endl;
         }
 
         // If the node is too large, split into two new nodes
-        if (sizeof(msg_content.front()) > t_len){
-            // Create new node buffers
+        else{
+            // Create new node buffer
             char * one_node = new char[t_len];
-            char * two_node = msg_content.front();
 
             // Copy into buffer
-            memcpy(one_node, two_node, t_len);
+            memcpy(one_node, msg_content.front().first, t_len);
+
+            // Create new pair
+            pair<char*, size_t> two_node (one_node, t_len);
 
             // Push to list
-            content.push_front(one_node);
+            content.push_back(two_node);
 
             // Update pointer on old list
-            two_node += t_len;
-            msg_content.pop_front();
-            msg_content.push_front(two_node);
+            msg_content.front().first += t_len;
+            msg_content.front().second -= t_len;
 
             // Increment i
             i += t_len;
@@ -194,6 +177,9 @@ int Message::msgSplit(Message &secondMsg, size_t len)
     // Set second message
     secondMsg.msglen = msglen - len;
     secondMsg.msg_content = msg_content;
+
+    // For testing
+    //cout << "Second message length: " << secondMsg.msglen << endl;
 
     // Set first message
     msg_content = content;
@@ -205,7 +191,7 @@ int Message::msgSplit(Message &secondMsg, size_t len)
 void Message::msgJoin(Message &secondMsg)
 {
     // Copy second message content to pointer
-    list<char *> content = secondMsg.msg_content;
+    list< pair<char*, size_t> >content = secondMsg.msg_content;
 
     while (!content.empty()){
         msg_content.push_back(content.front());
@@ -228,17 +214,29 @@ size_t Message::msgLen( )
 void Message::msgFlat(char *buffer)
 {
     // Variable to store current node
-    list <char *> to_buff = msg_content;
+    list <pair<char*, size_t> >to_buff = msg_content;
     char * c_node;
     int c_len;
 
     // Loop and add to buffer
     for (int i = 0; i < msglen;){
-        // Set current node and length
-        c_node = to_buff.front();
-        c_len = sizeof(c_node);
+        c_node = to_buff.front().first;
+        c_len = (int)to_buff.front().second;
+
+        // For testing
+        //cout << "Current Node: " << c_node  << endl;
+        //cout << "Current Node Length: " << c_len << endl;
 
         //Assume that sufficient memory has been allocated in buffer
         memcpy(buffer+i, c_node, c_len);
+
+        // Increment i by node size
+        i += c_len;
+
+        // Remove front node
+        to_buff.pop_front();
+
+        // For testing
+        //cout << "Curren Buffer: " << buffer << endl;
     }
 }
