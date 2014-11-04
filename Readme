@@ -1,3 +1,18 @@
-This is a primitive implementation of the message library. It provides
-correct functionality, but the performance is very poor. Your implementation
-must provide a better performance than this implementation.
+/*
+ * CSCI 4273/5273 Message, Thread and Scheduler Libraries
+ *
+ * Written by: Christopher Jordan and Aaron Davis
+ *
+ * Adapted from Code Written by: Shiv Mishra
+ *
+ * Last updated: October 22, 2014
+ */
+
+To Build All: make
+To Build Message: make message
+To Build Thread: make threadpool
+To Build Scheduler: make eventscheduler
+
+To Run Messge Test: ./message
+To Run Thread: ./thread
+To Run Scheduler: ./event
