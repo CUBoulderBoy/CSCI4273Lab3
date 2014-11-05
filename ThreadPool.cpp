@@ -21,6 +21,7 @@ ThreadPool::ThreadPool(size_t threadCount)
     m_threads = new pthread_t[threadCount];
     int err;
 
+    // create every thread with its own semaphore and available boolean
     for (int i = 0; i < m_threadCount; i++) {
         sem_t mutex;
         err = sem_init(&mutex, 0, 1);
@@ -29,6 +30,7 @@ ThreadPool::ThreadPool(size_t threadCount)
             exit(1);
         }
 
+        // call sem wait so the threads will block when they start running
         sem_wait(&mutex);
 
         pthread_t tid;
@@ -51,13 +53,16 @@ ThreadPool::~ThreadPool()
 
 int ThreadPool::dispatch_thread(void dispatch_function(void*), void *arg)
 {
-
+    // look for an available thread
     for (int i = 0; i < m_threadCount; i++) {
         pthread_t tid = m_threads[i];
         if (LOGGING) cout << "dispatching " << tid << endl;
         if (m_available[tid]) {
+            // each tid has its own function pointer
             m_fn_ptr[tid] = dispatch_function;
             m_arg[tid] = arg;
+
+            // set the thread to be unavailable and call sem_post to unblock it
             m_available[tid] = false;
             sem_post(&(m_sems[tid]));
             return 0;
@@ -81,7 +86,7 @@ void ThreadPool::execute_thread()
     pthread_t tid = pthread_self();
     while (true) {
         if (LOGGING) cout << tid << " waiting\n";
-        sem_wait(&m_sems[tid]);
+        sem_wait(&m_sems[tid]); // thread will be blocked here until dispatch thread is called
         if (LOGGING) cout << tid << " going\n";
         (*(m_fn_ptr[tid]))(m_arg[tid]);
         m_available[tid] = true;
