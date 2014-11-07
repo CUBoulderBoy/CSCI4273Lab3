@@ -5,7 +5,7 @@
  *
  * Adapted from Code Written by: Shiv Mishra
  *
- * Last updated: October 22, 2014
+ * Last updated: November 7, 2014
  */
 
 #include "message.h"

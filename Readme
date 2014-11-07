@@ -5,7 +5,7 @@
  *
  * Adapted from Code Written by: Shiv Mishra
  *
- * Last updated: October 22, 2014
+ * Last updated: November 7, 2014
  */
 
 To Build All: make
@@ -16,3 +16,10 @@ To Build Scheduler: make eventscheduler
 To Run Messge Test: ./message
 To Run Thread: ./thread
 To Run Scheduler: ./event
+
+*VERY IMPORTANT NOTE*
+There is an over-write of an existing buffer in the message driver. This doesn't seem like it would normally occur in a program as it would be bad practice to write over a buffer that is in use by another funciton call.
+
+If this is an error in the driver code, then the "message_no_copy" version of the message library removes the overhead of copying each buffer into a new buffer when it's added to the linked list.
+
+By switching the names, you can run this version of the code.
