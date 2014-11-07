@@ -40,6 +40,7 @@ private:
     int m_current_id;
     std::mutex m_mutex;
     std::vector<int> m_cancelled;
+    std::vector<int> m_scheduled;
     timeval m_tv;
 
     static void coordinateEvent(void* arg);

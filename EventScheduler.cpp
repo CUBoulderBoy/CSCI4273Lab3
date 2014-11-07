@@ -4,6 +4,8 @@
 #include <iostream>
 #include <sys/select.h>
 #include <sys/time.h>
+#include <unistd.h>
+
 
 #define LOGGING 0 // set to 1 to enable logging
 
@@ -39,6 +41,16 @@ void EventScheduler::coordinateEvent(void* arg)
 
     // execute the event
     (*(e.fn_ptr))(e.arg);
+
+    // remove the event from the events vector
+    es->m_mutex.lock();
+    for (std::vector<int>::iterator i = es->m_scheduled.begin(); i != es->m_scheduled.end(); ++i) {
+        if (e.id == *i) {
+            es->m_scheduled.erase(i);
+            break;
+        }
+    }
+    es->m_mutex.unlock();
 }
 
 
@@ -51,6 +63,10 @@ EventScheduler::EventScheduler(size_t maxEvents)
 
 EventScheduler::~EventScheduler()
 {
+    // wait for outstanding events to finish
+    while(!m_scheduled.empty()) {
+        usleep(1000);
+    }
     delete m_pool;
 }
 
@@ -69,6 +85,7 @@ int EventScheduler::eventSchedule(void evFunction(void *), void *arg, int timeou
     Event e = {evFunction, arg, event_time, m_current_id};
     m_mutex.lock();
     m_queue.push(e);
+    m_scheduled.push_back(m_current_id);
     m_mutex.unlock();
 
     // dispatch the event, it will wait until the timeout before executing
@@ -82,5 +99,11 @@ void EventScheduler::eventCancel(int eventId)
     m_mutex.lock();
     m_cancelled.push_back(eventId);
     if (LOGGING) cout << "cancelling event " << eventId << endl;
+    for (std::vector<int>::iterator i = m_scheduled.begin(); i != m_scheduled.end(); ++i) {
+        if (eventId == *i) {
+            m_scheduled.erase(i);
+            break;
+        }
+    }
     m_mutex.unlock();
 }
