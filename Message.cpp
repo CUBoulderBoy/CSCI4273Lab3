@@ -27,7 +27,9 @@ Message::Message()
 Message::Message(char *msg, size_t len)
 {
     msglen = len;
-    pair<char*,size_t> msg_pair (msg, len);
+    char* msg_store = new char[len];
+    memcpy(msg_store, msg, len);
+    pair<char*,size_t> msg_pair (msg_store, len);
     msg_content.push_front(msg_pair);
 }
 
@@ -39,7 +41,9 @@ Message::~Message( )
 void Message::msgAddHdr(char *hdr, size_t length)
 {
     msglen += length;
-    pair<char*,size_t> hdr_pair (hdr, length);
+    char* hdr_store = new char[length];
+    memcpy(hdr_store, hdr, length);
+    pair<char*,size_t> hdr_pair (hdr_store, length);
     msg_content.push_front(hdr_pair);
 }
 
