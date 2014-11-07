@@ -7,7 +7,7 @@ LIBS=-lpthread
 CC=g++
 
 # Main target
-all: threadpool eventscheduler message
+all: threadpool eventscheduler message message_shiv
 
 threadpool:
 	$(CC) -o thread $(CFLG) driver1.cc ThreadPool.cpp $(LIBS)
@@ -17,6 +17,9 @@ eventscheduler:
 
 message:
 	$(CC) -o message $(CFLG) driver3.cc Message.cpp $(LIBS)
+
+message_shiv:
+	$(CC) -o message_shiv $(CFLG) driver3_shiv.cc $(LIBS)
 
 clean:
 	rm -f event thread message *.o *.a
